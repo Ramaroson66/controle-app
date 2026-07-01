@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "Bash(npm run *)",
+      "Bash(git commit *)",
+      "Bash(git * main)",
+      "Bash(* --version)",
+      "Bash(* --help *)",
+      "Bash(claude mcp *)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_resize",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(python *)",
+      "Bash(source:*)",
+      "Bash(Find:*)",
+      "Bash(mkdir:*)",
+      "Bash(git add:*)",
+      "WebFetch(domain:*)",
+      "Skill(*)",
+      "Bash(python3 *)"
+    ],
+    "deny": []
+  }
+}

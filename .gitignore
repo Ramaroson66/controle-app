@@ -1,0 +1,61 @@
+# =============================================
+# Node / npm
+# =============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json.bak
+.npm/
+.yarn/
+
+# =============================================
+# Environnement / Secrets
+# =============================================
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+*.pem
+secrets.json
+backend/.env
+dashboard/.env
+
+# =============================================
+# Claude Code / Playwright cache
+# =============================================
+.claude/.playwright-mcp/
+.claude/scheduled_tasks.json
+.claude/.cache/
+
+# =============================================
+# Logs
+# =============================================
+logs/
+*.log
+
+# =============================================
+# Éditeurs / OS
+# =============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =============================================
+# Données de test / fichiers temporaires
+# =============================================
+backend/submissions.json
+backend/test_*.tmp
+*.tmp
+*.bak
+*.swp
+
+# =============================================
+# Données locales de l'agent (clé localStorage)
+# =============================================
+# Note : pas de fichier à ignorer ici, c'est dans le navigateur

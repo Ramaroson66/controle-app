@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle - Dashboard Superviseur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fraud-row { background-color: #fee2e2; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <nav class="bg-blue-600 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">🛡️ Controle - Dashboard Superviseur</h1>
+            <button id="exportBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-medium transition">
+                Exporter en CSV
+            </button>
+        </div>
+    </nav>
+
+    <main class="container mx-auto py-8 px-4">
+        <div class="mb-6 flex justify-between items-center">
+            <h2 class="text-xl font-semibold text-gray-700">Liste des soumissions terrain</h2>
+            <div class="flex gap-4">
+                <input type="text" id="searchInput" placeholder="Rechercher un agent..." class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+        </div>
+
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <table class="min-w-full leading-normal">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                        <th class="py-3 px-6 text-left">Agent</th>
+                        <th class="py-3 px-6 text-left">Questionnaire</th>
+                        <th class="py-3 px-6 text-left">Lieu (Commune)</th>
+                        <th class="py-3 px-6 text-center">Heure</th>
+                        <th class="py-3 px-6 text-center">GPS</th>
+                        <th class="py-3 px-6 text-center">Statut</th>
+                    </tr>
+                </thead>
+                <tbody id="submissionsBody">
+                    <!-- JS will populate this -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        async function fetchSubmissions() {
+            try {
+                const response = await fetch('/api/submissions');
+                const data = await response.json();
+                renderTable(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function renderTable(data) {
+            const body = document.getElementById('submissionsBody');
+            body.innerHTML = '';
+
+            if (data.length === 0) {
+                body.innerHTML = '<tr><td colspan="6" class="py-10 text-center text-gray-500">Aucune donnée reçue</td></tr>';
+                return;
+            }
+
+            data.forEach(sub => {
+                const isFraud = sub.fraud_detected || !sub.server_verified;
+                const row = document.createElement('tr');
+                row.className = `border-b border-gray-200 hover:bg-gray-50 ${isFraud ? 'fraud-row' : ''}`;
+
+                row.innerHTML = `
+                    <td class="py-3 px-6 text-left font-medium">${sub.agent_matricule}</td>
+                    <td class="py-3 px-6 text-left">${sub.questionnaire_no}</td>
+                    <td class="py-3 px-6 text-left">${sub.commune_id}</td>
+                    <td class="py-3 px-6 text-center">${new Date(sub.captured_at).toLocaleString()}</td>
+                    <td class="py-3 px-6 text-center">${sub.latitude.toFixed(4)}, ${sub.longitude.toFixed(4)}</td>
+                    <td class="py-3 px-6 text-center">
+                        <span class="px-2 py-1 rounded-full text-xs font-bold ${isFraud ? 'bg-red-200 text-red-700' : 'bg-green-200 text-green-700'}">
+                            ${isFraud ? '🚨 SUSPECT' : '✅ VALIDÉ'}
+                        </span>
+                    </td>
+                `;
+                body.appendChild(row);
+            });
+        }
+
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            window.location.href = '/api/export';
+        });
+
+        document.getElementById('searchInput').addEventListener('input', async (e) => {
+            const term = e.target.value.toLowerCase();
+            const response = await fetch('/api/submissions');
+            const data = await response.json();
+            const filtered = data.filter(sub => sub.agent_matricule.toLowerCase().includes(term));
+            renderTable(filtered);
+        });
+
+        fetchSubmissions();
+    </script>
+</body>
+</html>

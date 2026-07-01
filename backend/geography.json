@@ -1,0 +1,86 @@
+[
+  {
+    "id": "dist-tana-ville",
+    "name": "Tana Ville",
+    "communes": [
+      {
+        "id": "com-cu1",
+        "name": "CUA - Commune Urbaine I",
+        "lat_min": -18.915,
+        "lat_max": -18.875,
+        "long_min": 47.510,
+        "long_max": 47.540
+      },
+      {
+        "id": "com-cu2",
+        "name": "CUA - Commune Urbaine II",
+        "lat_min": -18.925,
+        "lat_max": -18.885,
+        "long_min": 47.490,
+        "long_max": 47.530
+      },
+      {
+        "id": "com-cu3",
+        "name": "CUA - Commune Urbaine III",
+        "lat_min": -18.935,
+        "lat_max": -18.895,
+        "long_min": 47.505,
+        "long_max": 47.545
+      },
+      {
+        "id": "com-cu4",
+        "name": "CUA - Commune Urbaine IV",
+        "lat_min": -18.945,
+        "lat_max": -18.905,
+        "long_min": 47.485,
+        "long_max": 47.525
+      },
+      {
+        "id": "com-cu5",
+        "name": "CUA - Commune Urbaine V",
+        "lat_min": -18.955,
+        "lat_max": -18.915,
+        "long_min": 47.495,
+        "long_max": 47.535
+      }
+    ]
+  },
+  {
+    "id": "dist-peripherie",
+    "name": "Périphérie",
+    "communes": [
+      {
+        "id": "com-ambo",
+        "name": "Ambohimanambola",
+        "lat_min": -18.985,
+        "lat_max": -18.945,
+        "long_min": 47.380,
+        "long_max": 47.430
+      },
+      {
+        "id": "com-ampi",
+        "name": "Ampitatafika",
+        "lat_min": -19.005,
+        "lat_max": -18.965,
+        "long_min": 47.370,
+        "long_max": 47.420
+      },
+      {
+        "id": "com-alan",
+        "name": "Alasora",
+        "lat_min": -18.965,
+        "lat_max": -18.925,
+        "long_min": 47.420,
+        "long_max": 47.470
+      },
+      {
+        "id": "com-bet",
+        "name": "Betsizaraina",
+        "lat_min": -18.995,
+        "lat_max": -18.955,
+        "long_min": 47.405,
+        "long_max": 47.455
+      }
+    ]
+  }
+]

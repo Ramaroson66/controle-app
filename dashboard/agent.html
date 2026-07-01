@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle - Mode Agent (Simulateur)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 font-sans min-h-screen">
+    <nav class="bg-slate-800 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">📱 Collecte Terrain - Mode Agent</h1>
+            <div class="flex gap-4 items-center">
+                <span id="quotaDisplay" class="text-sm bg-slate-700 px-3 py-1 rounded hidden">Quota: 0/0</span>
+                <a href="index.html" class="text-sm bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded transition">Voir Dashboard ➔</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto py-6 px-4 max-w-2xl">
+
+        <!-- WARNING: FILE PROTOCOL -->
+        <div id="fileProtocolWarning" class="hidden mb-6 p-4 bg-red-600 text-white rounded-xl shadow-lg text-center font-bold">
+            ⚠️ MODE HORS LIGNE : Les sauvegardes ne sont pas transmises au serveur.
+        </div>
+
+        <!-- SCREEN 1: ACTIVATION (SUPERVISEUR) -->
+        <div id="activationScreen" class="hidden bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200">
+            <div class="bg-blue-600 p-6 text-white text-center">
+                <h2 class="text-2xl font-bold">Activation de l'Appareil</h2>
+                <p class="text-blue-100 text-sm">Espace réservé au superviseur</p>
+            </div>
+            <div class="p-8 space-y-6">
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Mot de Passe Maître</label>
+                    <input type="password" id="masterPwd" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Quota de Saisies Autorisées</label>
+                    <input type="number" id="maxQuota" value="10" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button id="activateBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition shadow-lg">
+                    Activer l'Appareil
+                </button>
+                <p id="activationError" class="hidden text-center text-red-600 text-sm font-medium"></p>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: QUOTA EXHAUSTED -->
+        <div id="quotaScreen" class="hidden bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200 text-center p-12">
+            <div class="mb-6 text-6xl">⚠️</div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-4">Quota de saisies atteint</h2>
+            <p class="text-slate-600 mb-8">Cet appareil a atteint la limite de questionnaires autorisés. Veuillez contacter le superviseur pour une réactivation.</p>
+            <button id="reactivateBtn" class="bg-slate-800 text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-900 transition">
+                Demander Réactivation
+            </button>
+        </div>
+
+        <!-- SCREEN 3: MAIN COLLECTION FORM -->
+        <div id="mainApp" class="hidden space-y-8">
+            <!-- PANEL DE SIMULATION -->
+            <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded shadow-sm">
+                <h3 class="text-amber-800 font-bold mb-2 flex items-center">⚙️ Panneau de Simulation (Tests)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="space-y-2">
+                        <label class="block font-medium">Simuler l'Heure :</label>
+                        <input type="datetime-local" id="simTime" class="w-full p-2 border rounded">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block font-medium">Simuler la Position GPS :</label>
+                        <div class="flex gap-2">
+                            <input type="number" id="simLat" placeholder="Lat" step="0.000001" class="w-1/2 p-2 border rounded">
+                            <input type="number" id="simLong" placeholder="Long" step="0.000001" class="w-1/2 p-2 border rounded">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200">
+                <div class="bg-slate-50 p-4 border-b border-slate-200">
+                    <h2 class="text-lg font-semibold text-slate-700">Nouveau Questionnaire</h2>
+                </div>
+
+                <form id="collectionForm" class="p-6 space-y-6">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Matricule PNP</label>
+                            <input type="text" id="agent_matricule" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Nom du PNP</label>
+                            <input type="text" id="agent_name" required placeholder="Ex: Rakoto Jean" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Nom de l'Étude</label>
+                            <input type="text" id="study_name" required placeholder="Ex: Étude Pilote Marché Central" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Nom du Répondant / PDV</label>
+                            <input type="text" id="respondent_name" required placeholder="Ex: Épicerie Ralaivao" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">N° Questionnaire</label>
+                        <input type="text" id="questionnaire_no" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none uppercase">
+                    </div>
+
+                    <!-- CASCADE District -> Commune -> Fokontany -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">District</label>
+                            <select id="district_id" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="">-- Choisir District --</option>
+                                <option value="dist-tana-ville">Tana Ville</option>
+                                <option value="dist-peripherie">Périphérie</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Commune</label>
+                            <select id="commune_id" required disabled class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-slate-100">
+                                <option value="">-- Choisir Commune --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Fokontany (Saisie libre)</label>
+                        <input type="text" id="fokontany" required placeholder="Ex: Andohalo" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <!-- BOUTON OBTENIR MA POSITION -->
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-bold text-slate-500 uppercase tracking-wider">Données Capturées (Auto)</p>
+                            <button type="button" id="getPositionBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition">
+                                📍 Obtenir ma position
+                            </button>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-500">Heure :</span>
+                            <span id="displayTime" class="font-mono font-bold">...</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-500">Position :</span>
+                            <span id="displayGPS" class="font-mono font-bold">...</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-500">Précision :</span>
+                            <span id="displayAccuracy" class="font-mono font-bold text-slate-400">En attente</span>
+                        </div>
+                    </div>
+
+                    <div id="errorMessage" class="hidden p-4 bg-red-100 text-red-700 rounded-lg text-sm font-medium border border-red-200">
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all transform active:scale-95 shadow-lg">
+                        Clôturer et Sauvegarder
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const APP_STORAGE_KEY = 'controle_app_config';
+        const LOCAL_SUBMISSIONS_KEY = 'controle_local_submissions';
+        const MASTER_PASSWORD = 'admin';
+
+        // Helper: format text as "Nom Propre" while preserving known acronyms
+        const ACRONYMS = ['PNP', 'PDV', 'CUA', 'CU', 'RN', 'RNI', 'EST', 'OUEST', 'NORD', 'SUD'];
+        function toProperName(str) {
+            if (!str) return str;
+            return str.toLowerCase().split(/(\s+|-|')/).map((part, i) => {
+                if (i % 2 === 1) return part; // whitespace / hyphen / apostrophe separators
+                if (!part) return part;
+                const upper = part.toUpperCase();
+                if (ACRONYMS.includes(upper)) return upper;
+                return part.charAt(0).toUpperCase() + part.slice(1);
+            }).join('');
+        }
+
+        // Apply proper-name formatting on blur to free-text fields
+        ['agent_name', 'respondent_name', 'study_name', 'fokontany'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('blur', () => {
+                el.value = toProperName(el.value.trim());
+            });
+        });
+
+        // Detect file:// protocol and warn user
+        if (window.location.protocol === 'file:') {
+            document.getElementById('fileProtocolWarning').classList.remove('hidden');
+        }
+
+        // Géographie embarquée directement pour garantir l'affichage immédiat
+        const GEOGRAPHY_DATA = [
+            {
+                id: 'dist-tana-ville',
+                name: 'Tana Ville',
+                communes: [
+                    { id: 'com-cu1', name: 'CUA - Commune Urbaine I', lat_min: -18.915, lat_max: -18.875, long_min: 47.510, long_max: 47.540 },
+                    { id: 'com-cu2', name: 'CUA - Commune Urbaine II', lat_min: -18.925, lat_max: -18.885, long_min: 47.490, long_max: 47.530 },
+                    { id: 'com-cu3', name: 'CUA - Commune Urbaine III', lat_min: -18.935, lat_max: -18.895, long_min: 47.505, long_max: 47.545 },
+                    { id: 'com-cu4', name: 'CUA - Commune Urbaine IV', lat_min: -18.945, lat_max: -18.905, long_min: 47.485, long_max: 47.525 },
+                    { id: 'com-cu5', name: 'CUA - Commune Urbaine V', lat_min: -18.955, lat_max: -18.915, long_min: 47.495, long_max: 47.535 }
+                ]
+            },
+            {
+                id: 'dist-peripherie',
+                name: 'Périphérie',
+                communes: [
+                    { id: 'com-ambo', name: 'Ambohimanambola', lat_min: -18.985, lat_max: -18.945, long_min: 47.380, long_max: 47.430 },
+                    { id: 'com-ampi', name: 'Ampitatafika', lat_min: -19.005, lat_max: -18.965, long_min: 47.370, long_max: 47.420 },
+                    { id: 'com-alan', name: 'Alasora', lat_min: -18.965, lat_max: -18.925, long_min: 47.420, long_max: 47.470 },
+                    { id: 'com-bet', name: 'Betsizaraina', lat_min: -18.995, lat_max: -18.955, long_min: 47.405, long_max: 47.455 }
+                ]
+            }
+        ];
+
+        let lastSubmissionTime = null;
+
+        function getConfig() {
+            const config = localStorage.getItem(APP_STORAGE_KEY);
+            return config ? JSON.parse(config) : { isActivated: false, maxQuota: 0, currentCount: 0 };
+        }
+
+        function saveConfig(config) {
+            localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(config));
+            updateUI();
+        }
+
+        function updateUI() {
+            const config = getConfig();
+            const activationScreen = document.getElementById('activationScreen');
+            const quotaScreen = document.getElementById('quotaScreen');
+            const mainApp = document.getElementById('mainApp');
+            const quotaDisplay = document.getElementById('quotaDisplay');
+
+            activationScreen.classList.add('hidden');
+            quotaScreen.classList.add('hidden');
+            mainApp.classList.add('hidden');
+            quotaDisplay.classList.add('hidden');
+
+            if (!config.isActivated) {
+                activationScreen.classList.remove('hidden');
+            } else if (config.currentCount >= config.maxQuota) {
+                quotaScreen.classList.remove('hidden');
+            } else {
+                mainApp.classList.remove('hidden');
+                quotaDisplay.classList.remove('hidden');
+                quotaDisplay.innerText = `Quota: ${config.currentCount}/${config.maxQuota}`;
+            }
+        }
+
+        document.getElementById('activateBtn').addEventListener('click', () => {
+            const pwd = document.getElementById('masterPwd').value;
+            const quota = parseInt(document.getElementById('maxQuota').value);
+            const errorEl = document.getElementById('activationError');
+
+            if (pwd === MASTER_PASSWORD && quota > 0) {
+                saveConfig({ isActivated: true, maxQuota: quota, currentCount: 0 });
+                errorEl.classList.add('hidden');
+            } else {
+                errorEl.innerText = "Mot de passe incorrect ou quota invalide.";
+                errorEl.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('reactivateBtn').addEventListener('click', () => {
+            document.getElementById('activationScreen').classList.remove('hidden');
+            document.getElementById('quotaScreen').classList.add('hidden');
+        });
+
+        // CASCADE District -> Commune
+        document.getElementById('district_id').addEventListener('change', (e) => {
+            const distId = e.target.value;
+            const communeSelect = document.getElementById('commune_id');
+
+            communeSelect.innerHTML = '<option value="">-- Choisir Commune --</option>';
+
+            if (distId && GEOGRAPHY_DATA.length > 0) {
+                const district = GEOGRAPHY_DATA.find(d => d.id === distId);
+                if (district && district.communes) {
+                    district.communes.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.name;
+                        communeSelect.appendChild(opt);
+                    });
+                    communeSelect.disabled = false;
+                    communeSelect.classList.remove('bg-slate-100');
+                } else {
+                    communeSelect.disabled = true;
+                    communeSelect.classList.add('bg-slate-100');
+                }
+            } else {
+                communeSelect.disabled = true;
+                communeSelect.classList.add('bg-slate-100');
+            }
+        });
+
+        // BOUTON OBTENIR MA POSITION
+        document.getElementById('getPositionBtn').addEventListener('click', () => {
+            const displayGPS = document.getElementById('displayGPS');
+            const displayAcc = document.getElementById('displayAccuracy');
+
+            const simLat = document.getElementById('simLat').value;
+            const simLong = document.getElementById('simLong').value;
+
+            if (simLat && simLong) {
+                const lat = parseFloat(simLat);
+                const lng = parseFloat(simLong);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    displayGPS.innerText = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    displayAcc.innerText = "2.1 m (Simulé)";
+                    displayAcc.classList.remove('text-red-600');
+                    displayAcc.classList.add('text-green-600');
+                    return;
+                }
+            }
+            if (navigator.geolocation) {
+                displayGPS.innerText = "Capture en cours...";
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        document.getElementById('simLat').value = pos.coords.latitude;
+                        document.getElementById('simLong').value = pos.coords.longitude;
+                        displayGPS.innerText = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
+                        displayAcc.innerText = `${pos.coords.accuracy.toFixed(1)} m`;
+                        if (pos.coords.accuracy < 4) {
+                            displayAcc.classList.remove('text-red-600');
+                            displayAcc.classList.add('text-green-600');
+                        } else {
+                            displayAcc.classList.add('text-red-600');
+                        }
+                    },
+                    (err) => {
+                        displayGPS.innerText = "Erreur GPS";
+                        displayAcc.innerText = err.message;
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                displayGPS.innerText = "Non supporté";
+            }
+        });
+
+        function validate(data) {
+            const { systemTime, latitude, longitude, commune_id, fokontany } = data;
+            const hour = systemTime.getHours();
+            const minute = systemTime.getMinutes();
+            const currentTimeInMinutes = hour * 60 + minute;
+
+            if (currentTimeInMinutes < 7 * 60) return "Heure interdite : Avant 07h00.";
+            if (currentTimeInMinutes > 19 * 60) return "Heure interdite : Après 19h00.";
+            if (currentTimeInMinutes >= 12 * 60 && currentTimeInMinutes < 12 * 60 + 30) return "Heure interdite : Pause méridienne.";
+
+            if (latitude === undefined || longitude === undefined || isNaN(latitude) || isNaN(longitude)) {
+                return "Position GPS manquante. Cliquez sur 'Obtenir ma position'.";
+            }
+            if (!fokontany) return "Le Fokontany est obligatoire.";
+
+            const commune = GEOGRAPHY_DATA.flatMap(d => d.communes).find(c => c.id === commune_id);
+            if (!commune) return "Commune non sélectionnée.";
+
+            if (latitude < commune.lat_min || latitude > commune.lat_max || longitude < commune.long_min || longitude > commune.long_max) {
+                return "Vous n'êtes pas sur le lieu indiqué (Hors Zone).";
+            }
+            return null;
+        }
+
+        const form = document.getElementById('collectionForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errBox = document.getElementById('errorMessage');
+            errBox.classList.add('hidden');
+
+            const simTimeVal = document.getElementById('simTime').value;
+            // Format free-text fields as Proper Name before submission
+            const agentMatricule = document.getElementById('agent_matricule').value;
+            const agentName = toProperName(document.getElementById('agent_name').value);
+            const studyName = toProperName(document.getElementById('study_name').value);
+            const respondentName = toProperName(document.getElementById('respondent_name').value);
+            const fokontany = toProperName(document.getElementById('fokontany').value);
+            // Reflect formatted values back into inputs
+            document.getElementById('agent_name').value = agentName;
+            document.getElementById('study_name').value = studyName;
+            document.getElementById('respondent_name').value = respondentName;
+            document.getElementById('fokontany').value = fokontany;
+
+            const data = {
+                agent_matricule: agentMatricule,
+                agent_name: agentName,
+                study_name: studyName,
+                respondent_name: respondentName,
+                questionnaire_no: document.getElementById('questionnaire_no').value.toUpperCase(),
+                district_id: document.getElementById('district_id').value,
+                commune_id: document.getElementById('commune_id').value,
+                fokontany: fokontany,
+                systemTime: simTimeVal ? new Date(simTimeVal) : new Date(),
+                latitude: parseFloat(document.getElementById('simLat').value),
+                longitude: parseFloat(document.getElementById('simLong').value),
+            };
+
+            if (lastSubmissionTime) {
+                const diff = (data.systemTime - lastSubmissionTime) / (1000 * 60);
+                if (diff < 45) {
+                    errBox.innerText = `Attendez l'heure exacte : ${Math.ceil(45 - diff)} min restantes.`;
+                    errBox.classList.remove('hidden');
+                    return;
+                }
+            }
+
+            const error = validate(data);
+            if (error) {
+                errBox.innerText = error;
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            // Try to flush any locally-stored submissions first (when server is back)
+            try {
+                const localSubs = JSON.parse(localStorage.getItem(LOCAL_SUBMISSIONS_KEY) || '[]');
+                if (localSubs.length > 0) {
+                    const flushable = localSubs.filter(s => !s._synced);
+                    for (const sub of flushable) {
+                        try {
+                            await fetch('/api/submissions', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(sub)
+                            });
+                            sub._synced = true;
+                        } catch (e) { /* server still down, leave for next time */ }
+                    }
+                    localStorage.setItem(LOCAL_SUBMISSIONS_KEY, JSON.stringify(localSubs));
+                }
+            } catch (e) { /* ignore */ }
+
+            try {
+                let response;
+                try {
+                    response = await fetch('/api/submissions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ...data, captured_at: data.systemTime.toISOString() })
+                    });
+                } catch (networkErr) {
+                    // Fallback: save locally (file:// mode or server down)
+                    const localSubs = JSON.parse(localStorage.getItem(LOCAL_SUBMISSIONS_KEY) || '[]');
+                    localSubs.push({ ...data, captured_at: data.systemTime.toISOString(), id: 'local-' + Date.now(), received_at: new Date().toISOString(), server_verified: false });
+                    localStorage.setItem(LOCAL_SUBMISSIONS_KEY, JSON.stringify(localSubs));
+                    response = { ok: true, _local: true };
+                }
+
+                if (response.ok) {
+                    const config = getConfig();
+                    config.currentCount++;
+                    saveConfig(config);
+                    lastSubmissionTime = data.systemTime;
+                    alert('✅ Données scellées et sauvegardées !' + (response._local ? '\n\n⚠️ En mode local (file://) : à retransmettre plus tard.' : ''));
+                    // Reset form but keep GPS & District to make next entry faster
+                    form.reset();
+                    document.getElementById('simLat').value = data.latitude;
+                    document.getElementById('simLong').value = data.longitude;
+                    document.getElementById('displayGPS').innerText = `${data.latitude.toFixed(6)}, ${data.longitude.toFixed(6)}`;
+                    document.getElementById('displayAccuracy').innerText = "2.1 m (Simulé)";
+                    document.getElementById('commune_id').disabled = true;
+                    document.getElementById('commune_id').classList.add('bg-slate-100');
+                } else {
+                    const resData = await response.json();
+                    throw new Error(resData.error || 'Erreur serveur');
+                }
+            } catch (err) {
+                errBox.innerText = "Erreur : " + err.message;
+                errBox.classList.remove('hidden');
+            }
+        });
+
+        function updateDisplays() {
+            const simTimeVal = document.getElementById('simTime').value;
+            const now = simTimeVal ? new Date(simTimeVal) : new Date();
+            document.getElementById('displayTime').innerText = now.toLocaleString();
+        }
+        setInterval(updateDisplays, 1000);
+
+        updateUI();
+    </script>
+</body>
+</html>
