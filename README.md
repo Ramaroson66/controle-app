@@ -103,14 +103,22 @@ Voir [`backend/geography.json`](backend/geography.json) pour les bornes min/max 
 
 ```
 Controle/
-├── backend/                # API Node.js
-│   ├── index.js            # Serveur Express
+├── api/                    # Serverless functions Vercel
+│   ├── submissions.js      # POST/GET /api/submissions
+│   ├── geography.js        # GET /api/geography
+│   ├── export.js           # GET /api/export
+│   ├── _storage.js         # Module de stockage partagé
+│   └── _geography.js       # Module géographique partagé
+├── backend/                # Serveur Express (développement local uniquement)
+│   ├── index.js            # Serveur Express (équivalent des serverless)
 │   ├── geography.json      # Districts + communes + bornes GPS
 │   ├── submissions.json    # Données collectées (généré à l'usage)
 │   └── test_cascade.js     # Tests Playwright
-├── dashboard/              # Interfaces web
+├── dashboard/              # Interfaces web (HTML statique)
 │   ├── index.html          # Dashboard superviseur
 │   └── agent.html          # Simulateur mobile
+├── vercel.json             # Configuration Vercel
+├── .vercelignore           # Fichiers exclus du déploiement Vercel
 ├── .claude/                # Configuration Claude Code (versionnée)
 ├── start.bat               # Lanceur Windows
 ├── PRD.md                  # Cahier des charges
@@ -137,3 +145,38 @@ En production, le système intègrera :
 ## 📄 Licence
 
 À définir.
+
+---
+
+## ☁️ Déploiement sur Vercel
+
+L'application est prête à être déployée sur [Vercel](https://vercel.com) en quelques clics.
+
+### Déploiement en 1 clic (recommandé)
+
+1. Allez sur [vercel.com/new](https://vercel.com/new)
+2. **Import Git Repository** : sélectionnez `Ramaroson66/controle-app`
+3. Vercel détecte automatiquement la configuration via `vercel.json` — ne changez rien
+4. Cliquez sur **Deploy**
+5. 🎉 L'application est en ligne ! (URL du type `controle-app-xxxx.vercel.app`)
+
+### Architecture Vercel
+
+- **API** : Les fichiers dans `api/` deviennent des serverless functions.
+- **Frontend** : Les fichiers dans `dashboard/` sont servis en statique.
+- **Stockage** : Sur Vercel, les données sont stockées dans `/tmp` (éphémères).
+  - Pour une vraie persistance, connectez **Vercel KV** (gratuit, voir `DEPLOYMENT.md`).
+
+### Routes disponibles après déploiement
+
+| URL | Description |
+|---|---|
+| `/` | Dashboard superviseur |
+| `/agent.html` | Simulateur mobile |
+| `/api/geography` | Districts + communes (JSON) |
+| `/api/submissions` | POST = ajouter, GET = lister |
+| `/api/export` | Téléchargement CSV |
+
+### Redéploiement automatique
+
+À chaque `git push` sur la branche `main`, Vercel redéploie automatiquement.

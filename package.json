@@ -1,0 +1,26 @@
+{
+  "name": "controle",
+  "version": "1.0.0",
+  "description": "Application de collecte terrain antifraude - Madagascar",
+  "main": "api/index.js",
+  "scripts": {
+    "dev": "node backend/index.js",
+    "start": "node backend/index.js",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "geofencing",
+    "antifraude",
+    "madagascar",
+    "collecte-terrain"
+  ],
+  "author": "DADOO",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "uuid": "^14.0.0"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}

@@ -1,0 +1,18 @@
+# Fichiers à ignorer lors du déploiement Vercel
+node_modules/
+backend/node_modules/
+.git/
+.gitignore
+.vercelignore
+Datas/
+mobile-logic/
+.md/
+.claude/.playwright-mcp/
+.claude/scheduled_tasks.json
+*.log
+.env
+.env.local
+backend/test_*.js
+*.xlsx
+*.docx
+*.csv
